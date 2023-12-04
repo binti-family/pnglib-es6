@@ -1,6 +1,3 @@
-import tinycolor from 'tinycolor2';
-import base64 from 'base64-js';
-
 const HEADER = '\x89PNG\r\n\x1A\n';
 
 /* Create crc32 lookup table */
@@ -53,7 +50,7 @@ function writeString(buffer, offset, string) {
 	return offset;
 }
 
-export default class PNGImage {
+module.exports = class PNGImage {
 
 	constructor(width, height, depth, backgroundColor = 'transparent') {
 		this.width = width;
@@ -126,7 +123,7 @@ export default class PNGImage {
 			write2lsb(buffer, off, ~size);
 		}
 
-		this.backgroundColor = this.createColor(backgroundColor);
+		this.backgroundColor = this.color(0, 0, 0, 0);
 	}
 
 	index(x, y) {
@@ -154,9 +151,9 @@ export default class PNGImage {
 		return this.palette[color];
 	}
 
-	getBase64() {
+	getBuffer() {
 		this.deflate();
-		return base64.fromByteArray(new Uint8Array(this.buffer.buffer));
+		return Buffer.from(this.buffer.buffer);
 	}
 
 	deflate() {
@@ -195,12 +192,6 @@ export default class PNGImage {
 
 	getDataURL() {
 		return 'data:image/png;base64,' + this.getBase64();
-	}
-
-	createColor(color) {
-		color = tinycolor(color);
-		const rgb = color.toRgb();
-		return this.color(rgb.r, rgb.g, rgb.b, Math.round(rgb.a * 255));
 	}
 
 	setPixel(x, y, color) {
